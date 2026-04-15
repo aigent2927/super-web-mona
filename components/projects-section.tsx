@@ -1,52 +1,56 @@
 'use client'
 
 import Image from 'next/image'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, useCallback } from 'react'
 
-// Editorial images with varied positioning for organic layout
-const editorialImages = [
+// First 4 strongest editorial images BEFORE the text block
+const editorialImagesBefore = [
   {
     src: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/TFEModa2425_Mariona_Ramos_Editorial_28-Wm47vKHouboCZAdtYl1uJUyNCjXEhd.jpg',
     alt: 'Model with puppet strings and colorful layered vest',
     from: 'left',
     offsetX: '5%',
-    width: 'w-[70%] md:w-[38%]',
+    width: 'w-[75%] md:w-[42%]',
     aspect: 'aspect-[2/3]',
-    marginBottom: 'mb-12',
+    marginBottom: 'mb-16',
   },
   {
     src: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/TFEModa2425_Mariona_Ramos_Editorial_14-USAxdSCRHMUr25TsjY3mG1lswT96jk.jpg',
     alt: 'Seated model with star collar and brocade gown',
     from: 'right',
-    offsetX: '12%',
-    width: 'w-[55%] md:w-[28%]',
+    offsetX: '8%',
+    width: 'w-[70%] md:w-[38%]',
     aspect: 'aspect-[2/3]',
-    marginBottom: 'mb-32',
-  },
-  {
-    src: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/TFEModa2425_Mariona_Ramos_Editorial_38-G5rZV83cOcwbZWEfzKa0PswptXWEEO.jpg',
-    alt: 'Two models in kitchen scene',
-    from: 'left',
-    offsetX: '18%',
-    width: 'w-[65%] md:w-[42%]',
-    aspect: 'aspect-[2/3]',
-    marginBottom: 'mb-16',
+    marginBottom: 'mb-24',
   },
   {
     src: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/TFEModa2425_Mariona_Ramos_Editorial_06-ZoLWXp5zcncWvF2sBmO17NL8JIxl8n.jpg',
     alt: 'Overhead view of model reclined on patterned floor',
-    from: 'right',
+    from: 'left',
     offsetX: '0%',
-    width: 'w-[85%] md:w-[55%]',
+    width: 'w-[88%] md:w-[55%]',
     aspect: 'aspect-[3/2]',
-    marginBottom: 'mb-28',
+    marginBottom: 'mb-20',
   },
+  {
+    src: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/TFEModa2425_Mariona_Ramos_Editorial_38-G5rZV83cOcwbZWEfzKa0PswptXWEEO.jpg',
+    alt: 'Two models in kitchen scene',
+    from: 'right',
+    offsetX: '12%',
+    width: 'w-[72%] md:w-[44%]',
+    aspect: 'aspect-[2/3]',
+    marginBottom: 'mb-12',
+  },
+]
+
+// Remaining editorial images AFTER the text block
+const editorialImagesAfter = [
   {
     src: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/TFEModa2425_Mariona_Ramos_Editorial_33-Sq8nyhm0Y4aBgZ7VcJxwZMvpTAjCTU.jpg',
     alt: 'Model seated in checkered outfit with puppet string',
     from: 'left',
-    offsetX: '8%',
-    width: 'w-[50%] md:w-[26%]',
+    offsetX: '10%',
+    width: 'w-[65%] md:w-[36%]',
     aspect: 'aspect-[2/3]',
     marginBottom: 'mb-20',
   },
@@ -54,32 +58,28 @@ const editorialImages = [
     src: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/TFEModa2425_Mariona_Ramos_Editorial_27-chlqhAdAsvMoOzXUZOhM77jRTGq1ZY.jpg',
     alt: 'Model with puffy sleeve blouse and floral skirt',
     from: 'right',
-    offsetX: '15%',
-    width: 'w-[60%] md:w-[34%]',
-    aspect: 'aspect-[2/3]',
-    marginBottom: 'mb-10',
-  },
-]
-
-// Second group of editorial images after text
-const editorialImagesAfter = [
-  {
-    src: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/TFEModa2425_Mariona_Ramos_Editorial_35-7E2MRMsF40I6Q7FIYcSxqHw5ioqxON.jpg',
-    alt: 'Two models in checkered outfits on daybed',
-    from: 'right',
     offsetX: '6%',
     width: 'w-[68%] md:w-[40%]',
     aspect: 'aspect-[2/3]',
-    marginBottom: 'mb-24',
+    marginBottom: 'mb-28',
+  },
+  {
+    src: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/TFEModa2425_Mariona_Ramos_Editorial_35-7E2MRMsF40I6Q7FIYcSxqHw5ioqxON.jpg',
+    alt: 'Two models in checkered outfits on daybed',
+    from: 'left',
+    offsetX: '0%',
+    width: 'w-[78%] md:w-[48%]',
+    aspect: 'aspect-[2/3]',
+    marginBottom: 'mb-18',
   },
   {
     src: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/TFEModa2425_Mariona_Ramos_Editorial_02-FO30gUT6uwU222bsEbLYRwgqZSjmjb.jpg',
     alt: 'Seated model in red hand-knit sweater',
-    from: 'left',
-    offsetX: '20%',
-    width: 'w-[52%] md:w-[30%]',
+    from: 'right',
+    offsetX: '15%',
+    width: 'w-[62%] md:w-[35%]',
     aspect: 'aspect-[2/3]',
-    marginBottom: 'mb-14',
+    marginBottom: 'mb-24',
   },
   {
     src: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/TFEModa2425_Mariona_Ramos_Editorial_22-FmbV1UwqHCw1MSAPvCJe5rQiJ5b2Io.jpg',
@@ -88,34 +88,34 @@ const editorialImagesAfter = [
     offsetX: '0%',
     width: 'w-[90%] md:w-[58%]',
     aspect: 'aspect-[3/2]',
-    marginBottom: 'mb-32',
+    marginBottom: 'mb-20',
   },
   {
     src: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/TFEModa2425_Mariona_Ramos_Editorial_17-rmsGNl6Ona8KyCMY56s41CFepdj0El.jpg',
     alt: 'Model in tweed jacket with burgundy pants',
     from: 'right',
     offsetX: '10%',
-    width: 'w-[58%] md:w-[32%]',
+    width: 'w-[66%] md:w-[38%]',
     aspect: 'aspect-[2/3]',
-    marginBottom: 'mb-18',
+    marginBottom: 'mb-26',
   },
   {
     src: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/TFEModa2425_Mariona_Ramos_Editorial_19-Delehd6usN5SYVBg679Yz4zbW3rdli.jpg',
     alt: 'Low angle of model in tweed jacket',
-    from: 'right',
-    offsetX: '0%',
-    width: 'w-[80%] md:w-[50%]',
+    from: 'left',
+    offsetX: '5%',
+    width: 'w-[82%] md:w-[52%]',
     aspect: 'aspect-[3/2]',
-    marginBottom: 'mb-26',
+    marginBottom: 'mb-22',
   },
   {
     src: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/TFEModa2425_Mariona_Ramos_Editorial_25-WYZR0p5tHl51cag4r9mSV7xmM6udDZ.jpg',
     alt: 'Seated model in teal fur coat',
-    from: 'left',
-    offsetX: '25%',
-    width: 'w-[48%] md:w-[25%]',
+    from: 'right',
+    offsetX: '18%',
+    width: 'w-[58%] md:w-[32%]',
     aspect: 'aspect-[2/3]',
-    marginBottom: 'mb-20',
+    marginBottom: 'mb-16',
   },
 ]
 
@@ -167,7 +167,22 @@ interface EditorialImageProps {
 
 function EditorialImage({ src, alt, from, offsetX, width, aspect, marginBottom }: EditorialImageProps) {
   const ref = useRef<HTMLDivElement>(null)
-  const [isVisible, setIsVisible] = useState(false)
+  const [hasRevealed, setHasRevealed] = useState(false)
+  const [isInView, setIsInView] = useState(false)
+  const lastScrollY = useRef(0)
+  const scrollDirection = useRef<'down' | 'up'>('down')
+
+  // Track scroll direction
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY
+      scrollDirection.current = currentScrollY > lastScrollY.current ? 'down' : 'up'
+      lastScrollY.current = currentScrollY
+    }
+
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
 
   useEffect(() => {
     const element = ref.current
@@ -176,27 +191,41 @@ function EditorialImage({ src, alt, from, offsetX, width, aspect, marginBottom }
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
-          // Bidirectional: true when visible, false when not
-          setIsVisible(entry.isIntersecting)
+          setIsInView(entry.isIntersecting)
+          
+          // Mark as revealed when it enters viewport while scrolling down
+          if (entry.isIntersecting && scrollDirection.current === 'down') {
+            setHasRevealed(true)
+          }
+          
+          // Reset revealed state when scrolling up and element leaves viewport
+          if (!entry.isIntersecting && scrollDirection.current === 'up' && hasRevealed) {
+            setHasRevealed(false)
+          }
         })
       },
       {
-        threshold: 0.15,
-        rootMargin: '-8% 0px -8% 0px',
+        threshold: 0.12,
+        rootMargin: '-5% 0px -5% 0px',
       }
     )
 
     observer.observe(element)
     return () => observer.disconnect()
-  }, [])
+  }, [hasRevealed])
 
   // Calculate the horizontal translation for enter/exit
-  const translateX = from === 'left' ? '-100px' : '100px'
+  const translateX = from === 'left' ? '-120px' : '120px'
 
   // Position styles based on direction
   const positionStyle = from === 'left'
     ? { marginLeft: offsetX, marginRight: 'auto' }
     : { marginRight: offsetX, marginLeft: 'auto' }
+
+  // Determine visibility state:
+  // - Show (in final position) when: revealed AND in view
+  // - Hide (off to side) when: not revealed OR (revealed but scrolled out of view going up)
+  const shouldShow = hasRevealed && isInView
 
   return (
     <div
@@ -204,9 +233,9 @@ function EditorialImage({ src, alt, from, offsetX, width, aspect, marginBottom }
       className={`${width} ${marginBottom}`}
       style={{
         ...positionStyle,
-        opacity: isVisible ? 1 : 0,
-        transform: isVisible ? 'translateX(0)' : `translateX(${translateX})`,
-        transition: 'opacity 0.8s cubic-bezier(0.23, 1, 0.32, 1), transform 0.8s cubic-bezier(0.23, 1, 0.32, 1)',
+        opacity: shouldShow ? 1 : 0,
+        transform: shouldShow ? 'translateX(0)' : `translateX(${translateX})`,
+        transition: 'opacity 0.9s cubic-bezier(0.23, 1, 0.32, 1), transform 0.9s cubic-bezier(0.23, 1, 0.32, 1)',
       }}
     >
       <div className={`relative ${aspect} overflow-hidden`}>
@@ -215,7 +244,7 @@ function EditorialImage({ src, alt, from, offsetX, width, aspect, marginBottom }
           alt={alt}
           fill
           className="object-cover"
-          sizes="(max-width: 768px) 80vw, 50vw"
+          sizes="(max-width: 768px) 85vw, 55vw"
         />
       </div>
     </div>
@@ -255,9 +284,9 @@ export function ProjectsSection() {
         </span>
       </div>
 
-      {/* First group of editorial images */}
+      {/* First 4 strongest editorial images */}
       <div className="flex flex-col">
-        {editorialImages.map((img) => (
+        {editorialImagesBefore.map((img) => (
           <EditorialImage key={img.src} {...img} from={img.from as 'left' | 'right'} />
         ))}
       </div>
@@ -272,7 +301,7 @@ export function ProjectsSection() {
         </p>
       </div>
 
-      {/* Second group of editorial images */}
+      {/* Remaining editorial images after text block */}
       <div className="flex flex-col">
         {editorialImagesAfter.map((img) => (
           <EditorialImage key={img.src} {...img} from={img.from as 'left' | 'right'} />
